@@ -18,6 +18,9 @@ const char* inputfile = NULL;
 const char* outputfile = NULL;
 unsigned int hexperline = 20;
 
+void print_help(){
+}
+
 byte hex_to_char(char* inpstr){
 	byte outbyte;
 	char input[3] = {inpstr[0], inpstr[1], '\0'};
@@ -36,6 +39,25 @@ bool filter_input(char inpchar){
 }
 
 void handle_args(int argc, char** argv){
+	for(int n = 2; n < argc; n++){
+		// Print help
+		if(!strcmp(argv[n], "-h") || !strcmp(argv[n], "--help")){
+			print_help();
+			exit(0);
+		// Create new file
+		} else if(!strcmp(argv[n], "-n") || !strcmp(argv[n], "--new"))
+			newfile = true;
+		// Set output file
+		else if((!strcmp(argv[n], "-o") || !strcmp(argv[n], "--output")) && n != argc - 1){
+			outputfile = argv[n+1];
+			seperateout = true;
+		// Set column count
+		} else if((!strcmp(argv[n], "-c") || !strcmp(argv[n], "--columns")) && n != argc - 1)
+			sscanf(argv[n + 1], "%d", hexperline);
+		// Set editor
+		else if((!strcmp(argv[n], "-e") || !strcmp(argv[n], "--editor")) && n != argc - 1)
+			editor = argv[n + 1];
+	}
 	if(!newfile){
 		inputfile = argv[1];
 		if(!seperateout)
@@ -121,22 +143,17 @@ int main(int argc, char** argv){
 	}
 	fclose(editedFp);
 
-	// Write the original file
-	if(!seperateout){
-		// Rewrite file
-		FILE* doneFp = fopen(inputfile, "wb");
-		byte readbyte;
-		// Process edited buffer
-		for(int n = 0; n < editedLength; n++){
-			if(!filter_input(editedBuffer[n]))
-				continue;
-			readbyte = hex_to_char(&editedBuffer[n]);
-			fprintf(doneFp, "%c", readbyte);
-			n++; // Since we read two bytes
-		}
-		fclose(doneFp);
-	} else {
-
+	// Rewrite file
+	FILE* doneFp = fopen(outputfile, "wb");
+	byte readbyte;
+	// Process edited buffer
+	for(int n = 0; n < editedLength; n++){
+		if(!filter_input(editedBuffer[n]))
+			continue;
+		readbyte = hex_to_char(&editedBuffer[n]);
+		fprintf(doneFp, "%c", readbyte);
+		n++; // Since we read two bytes
 	}
+	fclose(doneFp);
 	return 1;
 }
