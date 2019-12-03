@@ -76,7 +76,7 @@ void handle_args(int argc, char** argv){
 int main(int argc, char** argv){
 	// Handle args
 	if(argc < 2){
-		printf("dhex, no input file. Usage: dhex <file>");
+		printf("dhex, no input file. Usage: dhex <file>\n");
 		return -1;
 	} else {
 		handle_args(argc, argv);
