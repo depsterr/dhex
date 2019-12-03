@@ -66,11 +66,9 @@ void handle_args(int argc, char** argv){
 		else if((!strcmp(argv[n], "-v") || !strcmp(argv[n], "--verbose")))
 			verbose = true;
 	}
-	if(!newfile){
-		inputfile = argv[1];
-		if(!seperateout)
-			outputfile = inputfile;
-	}
+	inputfile = argv[1];
+	if(!seperateout)
+		outputfile = inputfile;
 }
 
 int main(int argc, char** argv){
