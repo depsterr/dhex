@@ -14,13 +14,14 @@
 bool newfile = false;
 bool seperateout = false;
 bool verbose = false;
+bool space = false;
 const char* editor = NULL;
 const char* inputfile = NULL;
 const char* outputfile = NULL;
-unsigned int hexperline = 20;
+int hexperline = 20;
 
 void print_help(){
-	printf("\ndhex, depsterr - hex\n\nUsage: dhex <input file> [ options ]\n\nFlags:\n\n-h\t--help\t\tdisplays this message\n\n-n\t--new\t\tcreates a new file instead of editing an existing one\n\n-o\t--output\twill output to a filename corresponding to the next arg\n\n-c\t--columns\tchanges the amount of columns per row in the hexfile to the next arg\n\n-e\t--editor\twill open the hexfile with the command given as the next arg\n\n-v\t--verbose\toutputs progress while writing files, slows down the process a bit\n\n");
+	printf("\ndhex, depsterr - hex\n\nUsage: dhex <input file> [ options ]\n\nFlags:\n\n-h\t--help\t\tdisplays this message\n\n-n\t--new\t\tcreates a new file instead of editing an existing one\n\n-o\t--output\twill output to a filename corresponding to the next arg\n\n-c\t--columns\tchanges the amount of columns per row in the hexfile to the next arg\n\n-e\t--editor\twill open the hexfile with the command given as the next arg\n\n-v\t--verbose\toutputs progress while writing files, slows down the process a bit\n\n-s\t--space\t\tadd a space inbetween bytes");
 }
 
 byte hex_to_char(char* inpstr){
@@ -58,13 +59,15 @@ void handle_args(int argc, char** argv){
 			outputfile = argv[n+1];
 			seperateout = true;
 		// Set column count
-		} else if((!strcmp(argv[n], "-c") || !strcmp(argv[n], "--columns")) && n != argc - 1)
-			sscanf(argv[n + 1], "%d", hexperline);
+		} else if((!strcmp(argv[n], "-c") || !strcmp(argv[n], "--columns")) && n != argc - 1){
+			hexperline = 2 * atoi(argv[n+1]);
 		// Set editor
-		else if((!strcmp(argv[n], "-e") || !strcmp(argv[n], "--editor")) && n != argc - 1)
+		} else if((!strcmp(argv[n], "-e") || !strcmp(argv[n], "--editor")) && n != argc - 1)
 			editor = argv[n + 1];
 		else if((!strcmp(argv[n], "-v") || !strcmp(argv[n], "--verbose")))
 			verbose = true;
+		else if((!strcmp(argv[n], "-s") || !strcmp(argv[n], "--space")))
+			space = true;
 	}
 	inputfile = argv[1];
 	if(!seperateout)
@@ -110,13 +113,16 @@ int main(int argc, char** argv){
 		// Create editing file
 		FILE* editFp = fopen(TMPEDIT, "wb");
 		// Write hex to it
-		fprintf(editFp, "%02x ", inputBuffer[0]); // To stop indentation after first one
+		if(space)
+			fprintf(editFp, "%02x ", inputBuffer[0]); // To stop indentation after first one
+		else
+			fprintf(editFp, "%02x", inputBuffer[0]); // To stop indentation after first one
 		if(verbose){
 			for(int n = 1; n < inputLength; n++){
 				fprintf(editFp, "%02x", inputBuffer[n]);
 				if((n + 1) % hexperline == 0)
 					fprintf(editFp, "\n");
-				else if(n < inputLength - 1)
+				else if(n < inputLength - 1 && space)
 					fprintf(editFp, " ");
 				printf("Writing hex file... Progress: %0.00f%\n", (float)(((float)n / (float)inputLength) * (float)100));
 			}
@@ -125,7 +131,7 @@ int main(int argc, char** argv){
 				fprintf(editFp, "%02x", inputBuffer[n]);
 				if((n + 1) % hexperline == 0)
 					fprintf(editFp, "\n");
-				else if(n < inputLength - 1)
+				else if(n < inputLength - 1 && space)
 					fprintf(editFp, " ");
 			}
 		}
