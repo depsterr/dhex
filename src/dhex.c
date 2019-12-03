@@ -132,6 +132,8 @@ int main(int argc, char** argv){
 			}
 		}
 		fclose(editFp);
+	} else {
+		system("rm /tmp/dhex.hex -f");
 	}
 
 	// Create and run command for editing
